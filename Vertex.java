@@ -3,27 +3,29 @@ import java.util.ArrayList;
 public class Vertex {
 	private Stop stop;
 	private ArrayList<Edge> edges;
-        private ArrayList<Edge> walkingEdges; 
+//        private ArrayList<Edge> walkingEdges; 
 	private Vertex parent;
 	
 	 public Vertex(Stop stop) {
+                
 	        this.stop = stop;
 	        edges = new ArrayList();
-                walkingEdges = new ArrayList();
+//                walkingEdges = new ArrayList();
 	        parent = null;
 	    }
 	 
-         public void addWalkingEdge(Edge e){
-             walkingEdges.add(e);
-         }
+//         public void addWalkingEdge(Edge e){
+//             walkingEdges.add(e);
+//         }
 	 public void addEdge(Edge e)
 	 {
 		 edges.add(e);  
 	 }
 	 
-	 public ArrayList<Edge> getEdges()
-	 {
-		 return this.edges;
+	 public ArrayList<Edge> getAllEdges()
+	 {         
+		 return edges;
+             
 	 }
 
 	public Stop getStop() {
@@ -38,13 +40,14 @@ public class Vertex {
 		this.parent = parent;
 	}
 
-    public ArrayList<Edge> getWalkingEdges() {
-        return walkingEdges;
-    }
+//    public ArrayList<Edge> getWalkingEdges() {
+//        return walkingEdges;
+//    }
+    
 
     @Override
     public String toString() {
-        return "Vertex{" + "stop=" + stop.getStopName() + ", edges=" + edges + ", walkingEdges=" + walkingEdges ;
+        return "Vertex{" + "stop=" + stop.getStopName() + ", edges=" + edges ;
     }
         
 }

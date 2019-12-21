@@ -43,6 +43,11 @@ public class Edge {
 		this.weight = weight;
 	}	
 
+    public Type getType() {
+        return type;
+    }
+        
+
     @Override
     public String toString() {
         return "Edge: " + "source " + source.getStop().getStopName() + ", destination " + destination.getStop().getStopName() + ", weight " + String.valueOf(weight) + ", type " + type.toString()  ;

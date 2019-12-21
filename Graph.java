@@ -8,12 +8,13 @@ public class Graph {
   
     public Graph(){
         
+              
         vertices = new ArrayList();
         edges = new ArrayList();
         Reader reader = new Reader();
         ArrayList<Line> lines = reader.readFile("Line.txt", "Line");
         ArrayList<Stop> stops = reader.readFile("Stop.txt", "Stop");
-        ArrayList<Trip> trips = reader.readFile("Trip.txt", "Trip");
+        
         ArrayList<Distance> distances = reader.readFile("Distance.txt", "Distance");  
         generateVertices(stops);
         generateStandardEdge(distances);
@@ -46,8 +47,9 @@ public class Graph {
                     String[] parts = neighbours[i].split(DELIMETER);
                     if(parts.length == 2){
                         Edge edge = new Edge(v, findVertexByStopId(parts[0]), Integer.parseInt(parts[1]), Edge.Type.WALKING);
-                        v.addWalkingEdge(edge);
+                        v.addEdge(edge);
                         edges.add(edge);
+                        
                     }
                 }
             }
@@ -66,6 +68,7 @@ public class Graph {
                 sourceVertex.addEdge(edge);
                 destinationVertex.addEdge(edge);
                 edges.add(edge);
+                
             }
         }
     }
@@ -112,32 +115,36 @@ public class Graph {
 	return vertices.size();
     }
     
-    public Edge getConnection(Vertex current, Vertex neighbor) {
-        Edge edge = null;
-        for (Edge t : getEdges(current)) {
-            if (t.getDestination().equals(neighbor)) {
-                edge = t;
-            }
-        }
-        return edge;
-    }
-        
-    public int getDistanceBetweenVertices(Vertex current, Vertex neighbor) {
-        
-        for (Edge edge: this.getEdges(current)) {
-            if (edge.getDestination().equals(neighbor))
-                return edge.getWeight();   
-        }
-        return 0;     // buraya bakılacak!!!!!!!!!!!
-    }
+//    public Edge getConnection(Vertex current, Vertex neighbor) {
+//        Edge edge = null;
+//        for (Edge t : getEdges(current)) {
+//            if (t.getDestination().equals(neighbor)) {
+//                edge = t;
+//            }
+//        }
+//        return edge;
+//    }
+//        
+//    public int getDistanceBetweenVertices(Vertex current, Vertex neighbor) {
+//        
+//        for (Edge edge: this.getEdges(current)) {
+//            if (edge.getDestination().equals(neighbor))
+//                return edge.getWeight();   
+//        }
+//        return 0;     // buraya bakılacak!!!!!!!!!!!
+//    }
     
     public ArrayList<Vertex> getVertices() {
         return vertices;
     }
 
-    public ArrayList<Edge> getEdges(Vertex vertex) {
-        return vertex.getEdges();
+    public ArrayList<Edge> getEdges() {
+        return edges;
     }
+    
+//    public ArrayList<Edge> getEdges(Vertex vertex) {
+//        return vertex.getEdges();
+//    }
     public void setVertices(ArrayList<Vertex> vertices) {
         this.vertices = vertices;
     }

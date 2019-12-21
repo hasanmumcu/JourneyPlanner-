@@ -1,108 +1,123 @@
 
+import java.util.ArrayList;
 import java.util.Collections;
-import static java.util.Collections.list;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class DijkstraAlgorithm {
 
-    private final Vertex start;
-    private final Vertex end;
-    private final Graph graph;
-    private LinkedList<Vertex> unexploredStations = new LinkedList<>();
-    private LinkedList<Edge> past = new LinkedList<>();
-    Map<Vertex, Integer> distances = new HashMap<>();
+    private final List<Vertex> nodes;
+    private final List<Edge> edges;
+    private Set<Vertex> settledNodes;
+    private Set<Vertex> unSettledNodes;
+    private Map<Vertex, Vertex> predecessors;
+    private Map<Vertex, Integer> distance;
 
-    public DijkstraAlgorithm(Vertex start, Vertex end, Graph newgraph) {
-        this.start = start;
-        this.end = end;
-        this.graph = newgraph;
-        
+    public DijkstraAlgorithm(Graph graph) {
+        // create a copy of the array so that we can operate on this array
+        this.nodes = new ArrayList<Vertex>(graph.getVertices());
+        this.edges = new ArrayList<Edge>(graph.getEdges());
     }
 
-    public Vertex run() {
-         //Setting the distances to every node to the max
-        for (Vertex station : graph.getVertices()) {
-            distances.put(station, Integer.MAX_VALUE);
-            unexploredStations.add(station);
+    public void execute(Vertex source) {
+        settledNodes = new HashSet<Vertex>();
+        unSettledNodes = new HashSet<Vertex>();
+        distance = new HashMap<Vertex, Integer>();
+        predecessors = new HashMap<Vertex, Vertex>();
+        distance.put(source, 0);
+        unSettledNodes.add(source);
+        while (unSettledNodes.size() > 0) {
+            Vertex node = getMinimum(unSettledNodes);
+            settledNodes.add(node);
+            unSettledNodes.remove(node);
+            findMinimalDistances(node);
         }
-        distances.put(start, 0);
-        this.unexploredStations.add(start);
-
-        while (this.unexploredStations.size() > 0) {
-            Vertex current = getBestEdgeSoFar();
-            if (current.equals(end)) {
-                return end;
-            }
-            System.out.println("Current: " + current.getStop().getStopName());
-            unexploredStations.remove(current);
-            findBestVertex(current);
-        }
-        return start;
     }
-    
-    public Vertex getBestEdgeSoFar() {
-        Vertex vertex = this.unexploredStations.iterator().next();
-        for (Vertex station : this.unexploredStations) {
-            if (distances.get(station) < distances.get(vertex)) {
-                vertex = station;
+
+    private void findMinimalDistances(Vertex node) {
+        List<Vertex> adjacentNodes = getNeighbors(node);
+        for (Vertex target : adjacentNodes) {
+            if (getShortestDistance(target) > getShortestDistance(node)
+                    + getDistance(node, target)) {
+                distance.put(target, getShortestDistance(node)
+                        + getDistance(node, target));
+                predecessors.put(target, node);
+                unSettledNodes.add(target);
             }
         }
-        return vertex;
-    }
-//v this hash calculation finds the neighbours of the current node and then, 
-//compares the distances between neighbours to find the best neighbour    
 
-    public void findBestVertex(Vertex current) {
-        LinkedList<Vertex> edges = getUnexploredEdges(current);
-//        System.out.println("Edges: " + edges.toString());
-        edges.forEach((vertex) -> {
-            int dist = graph.getDistanceBetweenVertices(current, vertex) + distances.get(current);
-            int vertexDist = distances.get(vertex);
-            if (dist < vertexDist) {
-                distances.put(vertex, dist);
-                past.add(graph.getConnection(current, vertex));
-                System.out.println("NextStation: " + vertex.getStop().getStopName());
-            }
-        });
     }
 
-        public LinkedList<Vertex> getUnexploredEdges(Vertex current) {
-        LinkedList<Vertex> connections = new LinkedList<>();
-        for (Edge edge : graph.getEdges(current)) {
-            if (this.unexploredStations.contains(edge.getDestination())) {
-                connections.add(edge.getDestination());
-//                System.out.println("Vertex> " + edge.getDestination().getStop().getStopName());
+    private int getDistance(Vertex node, Vertex target) {
+        for (Edge edge : edges) {
+            if (edge.getSource().equals(node)
+                    && edge.getDestination().equals(target)) {
+                return edge.getWeight();
             }
         }
-        return connections;
+        throw new RuntimeException("Should not happen");
     }
 
-    public LinkedList<Edge> getResult() {
-        LinkedList<Edge> past2 = new LinkedList<>();
-            Vertex destination = end;
-//while the destination is not equal to the start, get the desination's connections 
-            while (!destination.equals(start)) {
-                Edge dest = getConnectionDestination(destination);
-                past2.add(dest);
-                destination = dest.getSource();
-            }
-        
-        System.out.println(past.toString());
-        Collections.reverse(past2);
-        return past2;
-    }
-
-    public Edge getConnectionDestination(Vertex destination) {  // end vertex inden başlayıp geriye doğru path i yazdırıyor........
-        Edge connection = null;
-        for (Edge edge : past) {
-            if (edge.getDestination().equals(destination)) {
-                connection = edge;
+    private List<Vertex> getNeighbors(Vertex node) {
+        List<Vertex> neighbors = new ArrayList<Vertex>();
+        for (Edge edge : edges) {
+            if (edge.getSource().equals(node)
+                    && !isSettled(edge.getDestination())) {
+                neighbors.add(edge.getDestination());
             }
         }
-        return connection;
+        return neighbors;
     }
 
+    private Vertex getMinimum(Set<Vertex> vertexes) {
+        Vertex minimum = null;
+        for (Vertex vertex : vertexes) {
+            if (minimum == null) {
+                minimum = vertex;
+            } else {
+                if (getShortestDistance(vertex) < getShortestDistance(minimum)) {
+                    minimum = vertex;
+                }
+            }
+        }
+        return minimum;
+    }
+
+    private boolean isSettled(Vertex vertex) {
+        return settledNodes.contains(vertex);
+    }
+
+    private int getShortestDistance(Vertex destination) {
+        Integer d = distance.get(destination);
+        if (d == null) {
+            return Integer.MAX_VALUE;
+        } else {
+            return d;
+        }
+    }
+
+    /*
+     * This method returns the path from the source to the selected target and
+     * NULL if no path exists
+     */
+    public LinkedList<Vertex> getPath(Vertex target) {
+        LinkedList<Vertex> path = new LinkedList<Vertex>();
+        Vertex step = target;
+        // check if a path exists
+        if (predecessors.get(step) == null) {
+            return null;
+        }
+        path.add(step);
+        while (predecessors.get(step) != null) {
+            step = predecessors.get(step);
+            path.add(step);
+        }
+        // Put it into the correct order
+        Collections.reverse(path);
+        return path;
+    }
 }
